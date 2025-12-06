@@ -66,7 +66,7 @@ class ButtonGroup {
         uint8_t qTail_ = 0;
 
         // Helpers
-        uint8_t findIndex(uint8_t pin) const;
+        int8_t findIndex(uint8_t pin) const;
         void addIfMissing(uint8_t pin);
         String buildLabel(uint32_t mask, bool isLong) const;
 
