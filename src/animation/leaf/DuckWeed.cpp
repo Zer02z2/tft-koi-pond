@@ -1,13 +1,14 @@
 #include "DuckWeed.h"
+#include "../helper.h"
 
 DuckWeed::DuckWeed(float x, float y, float radius, int segments)
     : radius_(radius), xCur_(x), yCur_(y), xTar_(x), yTar_(y)
 {
-    float firstPointRadian = random(0, 2 * PI);
+    float firstPointRadian = randomFloat(0, 2 * PI);
     float segmentRadian = (2 * PI) / segments;
 
     for (int i = 0; i < segments; i++) {
-        float len = random(radius * 0.98f, radius * 1.02f);
+        float len = randomFloat(radius * 0.98f, radius * 1.02f);
         float radian = firstPointRadian + segmentRadian * i;
         points_.push_back({len, radian});
     }

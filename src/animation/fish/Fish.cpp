@@ -1,6 +1,7 @@
 #include "Fish.h"
 
-Fish::Fish(float x, float y, float length, float width, int canvasWidth, int canvasHeight) {
+Fish::Fish(float x, float y, float length, float width, int canvasWidth, int canvasHeight, uint32_t fillColor, uint32_t strokeColor):
+    fillColor_(fillColor), strokeColor_(strokeColor){
     gap_ = length / (float)bodyPoints.size();
     float smallestAngle = 165.0f;
     
@@ -34,8 +35,8 @@ Fish::Fish(float x, float y, float length, float width, int canvasWidth, int can
         std::vector<float> tSizes;
         for(float p : tailPoints) tSizes.push_back(width * p);
 
-        Chain newTail(x, y, gap_ * 0.5f * random(0.7f, 0.9f), 120.0f, tSizes);
-        float radian = random(0.0f, tailRadian) * (i % 2 == 0 ? 1 : -1);
+        Chain newTail(x, y, gap_ * 0.5f * randomFloat(0.7f, 0.9f), 120.0f, tSizes);
+        float radian = randomFloat(0.0f, tailRadian) * (i % 2 == 0 ? 1 : -1);
         tails_.push_back({newTail, radian, pos});
     }
 
@@ -67,7 +68,8 @@ void Fish::update(int width, int height) {
         f.fin.constrainMove(start.x, start.y, radian, (i <= 1 ? 0.3f : 0.8f));
     }
 
-    for (auto& t : tails_) {
+    for (int i = 0; i < tails_.size(); i++) {
+        auto& t = tails_[i];
         Point start = body_.getCircle(t.position).getPosition();
         Point next = body_.getCircle(t.position + 1).getPosition();
         float radian = findTangent(start, next) + t.radian;
@@ -102,19 +104,18 @@ float Fish::getWidth() const {
 // --- Drawing ---
 
 void Fish::draw(LGFX_Sprite* sprite) {
-    uint32_t bodyColor   = sprite->color565(29, 29, 29);
-    uint32_t finColor    = sprite->color565(30, 30, 30);
-    uint32_t tailColor   = sprite->color565(30, 30, 30);
-    
-    for (auto& f : fins_) f.fin.drawOutline(sprite, finColor);
-    for (auto& t : tails_) t.fin.drawOutline(sprite, tailColor);
+ 
+    for (auto& f : fins_) f.fin.draw(sprite, fillColor_, strokeColor_);
+    for (int i = 0; i < tails_.size(); i++) {
+        auto& t = tails_[i];
+        t.fin.draw(sprite, fillColor_, strokeColor_);
+        //t.fin.drawRig(sprite, strokeColor_);
+    }
 
-    body_.drawOutline(sprite, bodyColor);
+    body_.draw(sprite, fillColor_, strokeColor_);
 
     drawBackFin(sprite);
     drawEyes(sprite);
-    body_.drawOutline(sprite, bodyColor); // Draw body again to overlay fins/tails
-    //body_.drawRig(sprite, bodyColor); // Draw rig for debugging
 }
 
 void Fish::drawBackFin(LGFX_Sprite* ctx) {
@@ -132,7 +133,7 @@ void Fish::drawBackFin(LGFX_Sprite* ctx) {
             Point pCurr = body_.getCircle(i).getPosition();
             Point pPrev = body_.getCircle(i-1).getPosition();
             Point mid = {(pCurr.x + pPrev.x)/2.0f, (pCurr.y + pPrev.y)/2.0f};
-            ctx->drawLine((int)pCurr.x, (int)pCurr.y, (int)mid.x, (int)mid.y, TFT_DARKGREY);
+            ctx->drawLine((int)pCurr.x, (int)pCurr.y, (int)mid.x, (int)mid.y, strokeColor_);
         }
     }
 }
@@ -147,7 +148,7 @@ void Fish::drawEyes(LGFX_Sprite* ctx) {
     auto drawEye = [&](float rad) {
         float dx = eyeDist * cos(rad);
         float dy = eyeDist * sin(rad);
-        ctx->fillCircle((int)(p0.x + dx), (int)(p0.y + dy), (int)eyeSize, TFT_WHITE);
+        ctx->fillCircle((int)(p0.x + dx), (int)(p0.y + dy), (int)eyeSize, strokeColor_);
     };
 
     drawEye(radian + PI / 4.0f);

@@ -1,4 +1,5 @@
 #include "Controller.h"
+#include "animation/helper.h"
 
 Controller::Controller(LGFX &lcd,
                        LGFX_Sprite *sp0,
@@ -31,20 +32,23 @@ void Controller::begin() {
     // 1. Initialize Fish
     int w = lcd_.width();
     int h = lcd_.height();
-    float fishLength = std::min(w, h) * 0.3f; 
-    float fishWidth = fishLength * 0.2f;
+    float fishSize = sqrt(pow(w, 2) + pow(h, 2)) * 0.015 * randomFloat(0.8f, 1.2f);
+    float fishLength = fishSize * randomFloat(6.0f, 8.5f); 
+    float fishWidth = fishLength * randomFloat(0.2f, 0.24f);
+    uint32_t fishFillColor = lcd_.color565(0, 0, 0);
+    uint32_t fishStrokeColor = lcd_.color565(155, 155, 155);
     
     if (fish_) delete fish_;
     // Fish is centered initially
-    fish_ = new Fish(w/2.0f, h/2.0f, fishLength, fishWidth, w, h);
-
+    fish_ = new Fish(w/2.0f, h/2.0f, fishLength, fishWidth, w, h, fishFillColor, fishStrokeColor);
     // 2. Initialize Leaves
-    int numLeaves = 15;
+    int numLeaves = 10;
     leaves_.clear();
+    uint32_t leafFillColor = lcd_.color565(62, 145, 60); // Green
     for(int i=0; i<numLeaves; i++) {
         float size = sqrt(pow(w, 2) + pow(h, 2));
-        float radius = random(size * 0.02f, size * 0.05f);
-        leaves_.emplace_back(random(0, w), random(0, h), radius, 32);
+        float radius = randomFloat(size * 0.02f, size * 0.05f);
+        leaves_.emplace_back(randomFloat(0, w), randomFloat(0, h), radius, 32, leafFillColor, TFT_BLACK);
     }
 
     // 3. Initialize DuckWeeds
@@ -52,8 +56,8 @@ void Controller::begin() {
     duckWeeds_.clear();
     for(int i=0; i<numDuckWeeds; i++) {
         float size = sqrt(pow(w, 2) + pow(h, 2));
-        float radius = random(size * 0.001f, size * 0.01f);
-        duckWeeds_.emplace_back(random(0, w), random(0, h), radius, 4);
+        float radius = randomFloat(size * 0.001f, size * 0.01f);
+        duckWeeds_.emplace_back(randomFloat(0, w), randomFloat(0, h), radius, 4);
     }
 }
 

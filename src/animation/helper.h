@@ -26,3 +26,5 @@ float dist(float x1, float y1, float x2, float y2);
 // Drawing Helpers
 void drawQuadraticBezier(LGFX_Sprite* sprite, float x0, float y0, float x1, float y1, float x2, float y2, uint32_t color);
 void fillQuadraticBezier(LGFX_Sprite* sprite, Point anchor, float x0, float y0, float x1, float y1, float x2, float y2, uint32_t color);
+
+float randomFloat(float minValue, float maxValue);

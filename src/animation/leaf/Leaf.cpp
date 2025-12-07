@@ -1,13 +1,14 @@
 #include "Leaf.h"
+#include "../helper.h"
 
-Leaf::Leaf(float x, float y, float radius, int segments) 
-    : radius_(radius), xOrg_(x), yOrg_(y), xCur_(x), yCur_(y), xTar_(x), yTar_(y)
+Leaf::Leaf(float x, float y, float radius, int segments, uint32_t fillColor, uint32_t strokeColor) 
+    : radius_(radius), xOrg_(x), yOrg_(y), xCur_(x), yCur_(y), xTar_(x), yTar_(y), fillColor_(fillColor), strokeColor_(strokeColor)
 {
-    float firstPointRadian = random(0, 2 * PI);
+    float firstPointRadian = randomFloat(0, 2 * PI);
     float segmentRadian = (2 * PI) / segments;
 
     for (int i = 0; i < segments; i++) {
-        float len = (i == 0) ? random(radius * 0.1f, radius * 0.2f) : random(radius * 0.98f, radius * 1.02f);
+        float len = (i == 0) ? randomFloat(radius * 0.1f, radius * 0.2f) : randomFloat(radius * 0.98f, radius * 1.02f);
         float radian = firstPointRadian + segmentRadian * i;
         points_.push_back({len, radian});
     }
@@ -53,10 +54,6 @@ void Leaf::draw(LGFX_Sprite* sprite) {
         renderPoints.push_back(findPosition({xCur_, yCur_}, p.radian, p.length));
     }
 
-    // Colors (Hardcoded based on TS style)
-    uint32_t leafColor = sprite->color565(62, 145, 60); 
-    // Outline color in TS was background, here we skip or use dark
-    
     int len = renderPoints.size();
     Point pLast = renderPoints[len - 1];
     Point pStart = { (renderPoints[0].x + pLast.x)/2.0f, (renderPoints[0].y + pLast.y)/2.0f };
@@ -72,10 +69,10 @@ void Leaf::draw(LGFX_Sprite* sprite) {
         Point mid = { (p1.x + p2.x)/2.0f, (p1.y + p2.y)/2.0f };
         
         // Use the fill helper
-        fillQuadraticBezier(sprite, anchor, currentP.x, currentP.y, p1.x, p1.y, mid.x, mid.y, leafColor);
+        fillQuadraticBezier(sprite, anchor, currentP.x, currentP.y, p1.x, p1.y, mid.x, mid.y, fillColor_);
         currentP = mid;
     }
-    fillQuadraticBezier(sprite, anchor, currentP.x, currentP.y, pEnd.x, pEnd.y, pStart.x, pStart.y, leafColor);
+    fillQuadraticBezier(sprite, anchor, currentP.x, currentP.y, pEnd.x, pEnd.y, pStart.x, pStart.y, fillColor_);
 
     // Drawing closed loop
     for (int i = 0; i < len - 1; i++) {
@@ -83,12 +80,12 @@ void Leaf::draw(LGFX_Sprite* sprite) {
         Point p2 = renderPoints[i+1];
         Point mid = { (p1.x + p2.x)/2.0f, (p1.y + p2.y)/2.0f };
         
-        drawQuadraticBezier(sprite, currentP.x, currentP.y, p1.x, p1.y, mid.x, mid.y, TFT_BLACK);
+        drawQuadraticBezier(sprite, currentP.x, currentP.y, p1.x, p1.y, mid.x, mid.y, strokeColor_);
         currentP = mid;
     }
     
     // Close the loop
-    drawQuadraticBezier(sprite, currentP.x, currentP.y, pEnd.x, pEnd.y, pStart.x, pStart.y, TFT_BLACK);
+    drawQuadraticBezier(sprite, currentP.x, currentP.y, pEnd.x, pEnd.y, pStart.x, pStart.y, strokeColor_);
 }
 
 Point Leaf::getPosition() const {

@@ -16,9 +16,9 @@ Chain::Chain(float x, float y, float gap, float angle, const std::vector<float>&
 
 void Chain::freeMove(float x, float y, int width, int height) {
     float acceleration = circles_[0].followPoint(x, y, width, height);
-    frameCount_ += 25.0f * log(0.15f * acceleration + 1.0f);
+    frameCount_ += 25.0f * log(0.3f * acceleration + 1.0f);
 
-    float oscillateScale = (PI / 5.0f) * log(1.0f * acceleration + 1.0f);
+    float oscillateScale = (PI / 5.0f) * log(2.0f * acceleration + 1.0f);
 
     for (int i = 1; i < length_; i++) {
         float oscillateOffset = i * length_ * PI * 1.1368f;
@@ -74,20 +74,22 @@ Point Chain::calculatePoint(const Circle& circle, float radian) {
     return { pos.x + r * cos(radian), pos.y + r * sin(radian) };
 }
 
-void Chain::drawOutline(LGFX_Sprite* sprite, uint32_t color) {
-    std::vector<Point> points;
+void Chain::draw(LGFX_Sprite* sprite, uint32_t fillColor, uint32_t strokeColor) {
+    std::vector<Point> leftPoints;
+    std::vector<Point> rightPoints;
     
-    // 1. Left Side
+    if(length_ < 2) return;
+
+    // --- 1. Calculate Geometry ---
     for (int i = 0; i < length_; i++) {
         float radian = 0;
         if (i != 0 && i != length_ - 1) {
-            float radianDelta = findAngleBetween(circles_[i].getPosition(), circles_[i + 1].getPosition(), circles_[i - 1].getPosition());
-            float radianAlpha = findTangent(circles_[i].getPosition(), circles_[i - 1].getPosition());
-            
+            float radDelta = findAngleBetween(circles_[i].getPosition(), circles_[i + 1].getPosition(), circles_[i - 1].getPosition());
+            float radAlpha = findTangent(circles_[i].getPosition(), circles_[i - 1].getPosition());
             if (isOnLeft(circles_[i].getPosition(), circles_[i + 1].getPosition(), circles_[i - 1].getPosition())) {
-                radian = radianAlpha - radianDelta / 2.0f;
+                radian = radAlpha - radDelta / 2.0f;
             } else {
-                radian = radianAlpha - (2.0f * PI - radianDelta) / 2.0f;
+                radian = radAlpha - (2.0f * PI - radDelta) / 2.0f;
             }
         } else if (i == 0) {
             radian = findTangent(circles_[i].getPosition(), circles_[i + 1].getPosition()) + 0.5f * PI;
@@ -95,55 +97,62 @@ void Chain::drawOutline(LGFX_Sprite* sprite, uint32_t color) {
             radian = findTangent(circles_[i].getPosition(), circles_[i - 1].getPosition()) - 0.5f * PI;
         }
 
-        Point p = calculatePoint(circles_[i], radian);
-        if (i == 0) {
-            float headRadian = findTangent(circles_[i].getPosition(), circles_[i + 1].getPosition()) - 0.5f * PI;
-            points.push_back(calculatePoint(circles_[i], headRadian));
-        }
-        points.push_back(p);
+        leftPoints.push_back(calculatePoint(circles_[i], radian));
+        rightPoints.push_back(calculatePoint(circles_[i], radian + PI)); // Opposite side
     }
 
-    // 2. Right Side
+    // --- 2. Draw Fill (Triangle Strip) ---
+    // for (int i = 0; i < length_ - 1; i++) {
+    //     Point l1 = leftPoints[i];
+    //     Point r1 = rightPoints[i];
+    //     Point l2 = leftPoints[i+1];
+    //     Point r2 = rightPoints[i+1];
+
+    //     // Fill two triangles to form the quad between segments
+    //     sprite->fillTriangle((int)l1.x, (int)l1.y, (int)r1.x, (int)r1.y, (int)l2.x, (int)l2.y, fillColor);
+    //     sprite->fillTriangle((int)r1.x, (int)r1.y, (int)l2.x, (int)l2.y, (int)r2.x, (int)r2.y, fillColor);
+    // }
+
+    // Fill Caps to close gaps
+    //sprite->fillCircle((int)circles_[0].getPosition().x, (int)circles_[0].getPosition().y, (int)circles_[0].getRadius(), fillColor);
+    //sprite->fillCircle((int)circles_[length_-1].getPosition().x, (int)circles_[length_-1].getPosition().y, (int)circles_[length_-1].getRadius(), fillColor);
+
+
+    // --- 3. Draw Outline (Bezier Loop) ---
+    std::vector<Point> outlinePoints;
+    
+    // Add Left side points (Head -> Tail)
+    // Optional: Add Head cap point logic from TS if needed, but simple loop is usually fine
+    if(length_ > 0) {
+        float headRad = findTangent(circles_[0].getPosition(), circles_[1].getPosition()) - 0.5f * PI;
+        outlinePoints.push_back(calculatePoint(circles_[0], headRad)); // Nose
+    }
+    for(const auto& p : leftPoints) outlinePoints.push_back(p);
+
+    // Add Right side points (Tail -> Head)
     for (int i = length_ - 1; i >= 0; i--) {
-        float radian = 0;
-        if (i != 0 && i != length_ - 1) {
-            float radianDelta = findAngleBetween(circles_[i].getPosition(), circles_[i - 1].getPosition(), circles_[i + 1].getPosition());
-            float radianAlpha = findTangent(circles_[i].getPosition(), circles_[i + 1].getPosition());
-
-            if (isOnLeft(circles_[i].getPosition(), circles_[i - 1].getPosition(), circles_[i + 1].getPosition())) {
-                radian = radianAlpha - radianDelta / 2.0f;
-            } else {
-                radian = radianAlpha - (2.0f * PI - radianDelta) / 2.0f;
-            }
-            if (i == 1) {
-                points.insert(points.begin(), calculatePoint(circles_[i], radian));
-                continue;
-            }
-        } else if (i == 0) {
-            radian = findTangent(circles_[i].getPosition(), circles_[i + 1].getPosition()) - 0.5f * PI;
-        } else if (i == length_ - 1) {
-            radian = findTangent(circles_[i].getPosition(), circles_[i - 1].getPosition()) + 0.5f * PI;
-        }
-        points.push_back(calculatePoint(circles_[i], radian));
+        outlinePoints.push_back(rightPoints[i]);
     }
+    // Close the loop
+    outlinePoints.push_back(outlinePoints[0]);
 
-    // 3. Draw Loop
-    int len = points.size();
+    // Draw Smooth Curve through points
+    int len = outlinePoints.size();
     if(len < 2) return;
     
-    // Draw using Quadratic Bezier approximation
-    // Start from midpoint of first two points
-    Point pStart = { (points[0].x + points[len-1].x)/2.0f, (points[0].y + points[len-1].y)/2.0f };
+    Point pStart = { (outlinePoints[0].x + outlinePoints[1].x)/2.0f, (outlinePoints[0].y + outlinePoints[1].y)/2.0f };
     
-    for (int i = 1; i < len - 2; i++) {
-        Point pControl = points[i];
-        Point pEnd = { (points[i].x + points[i+1].x)/2.0f, (points[i].y + points[i+1].y)/2.0f };
+    for (int i = 1; i < len - 1; i++) {
+        Point pControl = outlinePoints[i];
+        Point pEnd = { (outlinePoints[i].x + outlinePoints[i+1].x)/2.0f, (outlinePoints[i].y + outlinePoints[i+1].y)/2.0f };
         
-        drawQuadraticBezier(sprite, pStart.x, pStart.y, pControl.x, pControl.y, pEnd.x, pEnd.y, color);
+        drawQuadraticBezier(sprite, pStart.x, pStart.y, pControl.x, pControl.y, pEnd.x, pEnd.y, strokeColor);
         pStart = pEnd;
     }
-    // Close the loop roughly (or refine logic)
-    drawQuadraticBezier(sprite, pStart.x, pStart.y, points[len-1].x, points[len-1].y, (points[0].x + points[len-1].x)/2.0f, (points[0].y + points[len-1].y)/2.0f, color);
+    // Close final segment
+    Point lastP = outlinePoints[len-1];
+    Point firstMid = { (outlinePoints[0].x + outlinePoints[1].x)/2.0f, (outlinePoints[0].y + outlinePoints[1].y)/2.0f };
+    drawQuadraticBezier(sprite, pStart.x, pStart.y, lastP.x, lastP.y, firstMid.x, firstMid.y, strokeColor);
 }
 
 void Chain::drawRig(LGFX_Sprite* sprite, uint32_t color) {

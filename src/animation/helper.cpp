@@ -80,3 +80,7 @@ void fillQuadraticBezier(LGFX_Sprite* sprite, Point anchor, float x0, float y0, 
         oldY = y;
     }
 }
+
+float randomFloat(float minValue, float maxValue) {
+    return minValue + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (maxValue - minValue)));
+}

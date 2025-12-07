@@ -15,7 +15,7 @@ class Chain {
         void constrainMove(float x, float y, float idealRadian, float constrainStrength = 0.7f);
         void simpleMove(float x, float y, int width, int height);
 
-        void drawOutline(LGFX_Sprite* sprite, uint32_t color);
+        void draw(LGFX_Sprite* sprite, uint32_t fillColor, uint32_t strokeColor);
         void drawRig(LGFX_Sprite* sprite, uint32_t color);
         
         Point calculatePoint(const Circle& circle, float radian);

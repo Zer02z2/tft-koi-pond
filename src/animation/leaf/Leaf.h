@@ -9,7 +9,7 @@ struct LeafPoint {
 
 class Leaf {
     public:
-        Leaf(float x, float y, float radius, int segments);
+        Leaf(float x, float y, float radius, int segments, uint32_t fillColor = TFT_WHITE, uint32_t strokeColor = TFT_BLACK);
         void update();
         void applyOscillation(float x, float y, float strength);
         void draw(LGFX_Sprite* sprite);
@@ -28,4 +28,7 @@ class Leaf {
         
         Point oscillateVector_ = {0, 0};
         float oscillateMax_;
+
+        uint32_t fillColor_;
+        uint32_t strokeColor_;
 };
