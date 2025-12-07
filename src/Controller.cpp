@@ -31,8 +31,8 @@ void Controller::begin() {
     // 1. Initialize Fish
     int w = lcd_.width();
     int h = lcd_.height();
-    float fishLength = std::min(w, h) * 0.5f; 
-    float fishWidth = fishLength * 0.15f;
+    float fishLength = std::min(w, h) * 0.3f; 
+    float fishWidth = fishLength * 0.2f;
     
     if (fish_) delete fish_;
     // Fish is centered initially
@@ -44,7 +44,7 @@ void Controller::begin() {
     for(int i=0; i<numLeaves; i++) {
         float size = sqrt(pow(w, 2) + pow(h, 2));
         float radius = random(size * 0.02f, size * 0.05f);
-        leaves_.emplace_back(random(0, w), random(0, h), radius, 6);
+        leaves_.emplace_back(random(0, w), random(0, h), radius, 32);
     }
 
     // 3. Initialize DuckWeeds
@@ -52,7 +52,7 @@ void Controller::begin() {
     duckWeeds_.clear();
     for(int i=0; i<numDuckWeeds; i++) {
         float size = sqrt(pow(w, 2) + pow(h, 2));
-        float radius = random(size * 0.001f, size * 0.005f);
+        float radius = random(size * 0.001f, size * 0.01f);
         duckWeeds_.emplace_back(random(0, w), random(0, h), radius, 4);
     }
 }

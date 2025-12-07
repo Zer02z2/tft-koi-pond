@@ -113,6 +113,8 @@ void Fish::draw(LGFX_Sprite* sprite) {
 
     drawBackFin(sprite);
     drawEyes(sprite);
+    body_.drawOutline(sprite, bodyColor); // Draw body again to overlay fins/tails
+    //body_.drawRig(sprite, bodyColor); // Draw rig for debugging
 }
 
 void Fish::drawBackFin(LGFX_Sprite* ctx) {
@@ -140,7 +142,7 @@ void Fish::drawEyes(LGFX_Sprite* ctx) {
     Point p1 = body_.getCircle(1).getPosition();
     float radian = findTangent(p0, p1);
     float eyeDist = body_.getCircle(2).getRadius(); // Approx dist
-    float eyeSize = gap_ * 0.4f;
+    float eyeSize = gap_ * 0.2f;
 
     auto drawEye = [&](float rad) {
         float dx = eyeDist * cos(rad);

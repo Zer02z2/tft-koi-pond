@@ -63,19 +63,32 @@ void Leaf::draw(LGFX_Sprite* sprite) {
     
     Point currentP = pStart;
 
+    // Fill curves
+    Point anchor = {xCur_, yCur_};
+    Point pEnd = renderPoints[len-1];
+    for (int i = 0; i < len - 1; i++) {
+        Point p1 = renderPoints[i];
+        Point p2 = renderPoints[i+1];
+        Point mid = { (p1.x + p2.x)/2.0f, (p1.y + p2.y)/2.0f };
+        
+        // Use the fill helper
+        fillQuadraticBezier(sprite, anchor, currentP.x, currentP.y, p1.x, p1.y, mid.x, mid.y, leafColor);
+        currentP = mid;
+    }
+    fillQuadraticBezier(sprite, anchor, currentP.x, currentP.y, pEnd.x, pEnd.y, pStart.x, pStart.y, leafColor);
+
     // Drawing closed loop
     for (int i = 0; i < len - 1; i++) {
         Point p1 = renderPoints[i];
         Point p2 = renderPoints[i+1];
         Point mid = { (p1.x + p2.x)/2.0f, (p1.y + p2.y)/2.0f };
         
-        drawQuadraticBezier(sprite, currentP.x, currentP.y, p1.x, p1.y, mid.x, mid.y, leafColor);
+        drawQuadraticBezier(sprite, currentP.x, currentP.y, p1.x, p1.y, mid.x, mid.y, TFT_BLACK);
         currentP = mid;
     }
     
     // Close the loop
-    Point pEnd = renderPoints[len-1];
-    drawQuadraticBezier(sprite, currentP.x, currentP.y, pEnd.x, pEnd.y, pStart.x, pStart.y, leafColor);
+    drawQuadraticBezier(sprite, currentP.x, currentP.y, pEnd.x, pEnd.y, pStart.x, pStart.y, TFT_BLACK);
 }
 
 Point Leaf::getPosition() const {

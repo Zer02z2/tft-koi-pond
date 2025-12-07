@@ -16,9 +16,9 @@ Chain::Chain(float x, float y, float gap, float angle, const std::vector<float>&
 
 void Chain::freeMove(float x, float y, int width, int height) {
     float acceleration = circles_[0].followPoint(x, y, width, height);
-    frameCount_ += 25.0f * log(0.3f * acceleration + 1.0f);
+    frameCount_ += 25.0f * log(0.15f * acceleration + 1.0f);
 
-    float oscillateScale = (PI / 5.0f) * log(2.0f * acceleration + 1.0f);
+    float oscillateScale = (PI / 5.0f) * log(1.0f * acceleration + 1.0f);
 
     for (int i = 1; i < length_; i++) {
         float oscillateOffset = i * length_ * PI * 1.1368f;
@@ -143,7 +143,7 @@ void Chain::drawOutline(LGFX_Sprite* sprite, uint32_t color) {
         pStart = pEnd;
     }
     // Close the loop roughly (or refine logic)
-    // drawQuadraticBezier(sprite, pStart.x, pStart.y, points[len-1].x, points[len-1].y, (points[0].x + points[len-1].x)/2.0f, (points[0].y + points[len-1].y)/2.0f, color);
+    drawQuadraticBezier(sprite, pStart.x, pStart.y, points[len-1].x, points[len-1].y, (points[0].x + points[len-1].x)/2.0f, (points[0].y + points[len-1].y)/2.0f, color);
 }
 
 void Chain::drawRig(LGFX_Sprite* sprite, uint32_t color) {

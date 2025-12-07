@@ -217,12 +217,14 @@ String ButtonGroup::buildLabel(uint32_t mask, bool isLong) const {
     int8_t right = rightPin_ ? findIndex(rightPin_) : -1;
     int8_t bottom = bottomPin_ ? findIndex(bottomPin_) : -1;
 
-    uint8_t mask = 0;
-    if (left >= 0 && (mask & (1UL << left))) mask |= 1;
-    if (right >= 0 && (mask & (1UL << right))) mask |= 2;
-    if (bottom >= 0 && (mask & (1UL << bottom))) mask |= 4;
+    uint8_t btnState = 0; // Renamed from 'mask' to 'btnState'
+    
+    // We check the input 'mask' (uint32_t) to see which buttons are active
+    if (left >= 0 && (mask & (1UL << left))) btnState |= 1;
+    if (right >= 0 && (mask & (1UL << right))) btnState |= 2;
+    if (bottom >= 0 && (mask & (1UL << bottom))) btnState |= 4;
 
-    switch (mask) {
+    switch (btnState) {
         case 1: return String("left-") + (isLong ? "long" : "short");
         case 2: return String("right-") + (isLong ? "long" : "short");
         case 4: return String("bottom-") + (isLong ? "long" : "short");

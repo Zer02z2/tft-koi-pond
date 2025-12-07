@@ -8,8 +8,17 @@ float findAngleBetween(const Point &pointCenter, const Point &pointA, const Poin
 
     float vectorDotProduct = vectorAx * vectorBx + vectorAy * vectorBy;
     float vectorLengthProduct = sqrt(pow(vectorAx, 2) + pow(vectorAy, 2)) * sqrt(pow(vectorBx, 2) + pow(vectorBy, 2));
-    if (vectorLengthProduct == 0) return 0.0f;
-    return acos(vectorDotProduct / vectorLengthProduct);
+    
+    if (vectorLengthProduct == 0) {
+        return 0.0f;
+    } else {
+        // --- FIX: Clamp the value to the valid range for acos [-1, 1] ---
+        float value = vectorDotProduct / vectorLengthProduct;
+        if (value > 1.0f) value = 1.0f;
+        if (value < -1.0f) value = -1.0f;
+        
+        return acos(value);
+    }
 }
 
 float findTangent(const Point &pointA, const Point &pointB) {
@@ -50,6 +59,23 @@ void drawQuadraticBezier(LGFX_Sprite* sprite, float x0, float y0, float x1, floa
         float x = invT * invT * x0 + 2 * invT * t * x1 + t * t * x2;
         float y = invT * invT * y0 + 2 * invT * t * y1 + t * t * y2;
         sprite->drawLine((int)oldX, (int)oldY, (int)x, (int)y, color);
+        oldX = x;
+        oldY = y;
+    }
+}
+
+void fillQuadraticBezier(LGFX_Sprite* sprite, Point anchor, float x0, float y0, float x1, float y1, float x2, float y2, uint32_t color) {
+    float oldX = x0;
+    float oldY = y0;
+    // Step 0.1 gives 10 triangles per curve. Decrease for higher quality.
+    for (float t = 0.1f; t <= 1.0f; t += 0.1f) {
+        float invT = 1.0f - t;
+        float x = invT * invT * x0 + 2 * invT * t * x1 + t * t * x2;
+        float y = invT * invT * y0 + 2 * invT * t * y1 + t * t * y2;
+        
+        // Draw a filled triangle from the anchor to the current line segment
+        sprite->fillTriangle((int)anchor.x, (int)anchor.y, (int)oldX, (int)oldY, (int)x, (int)y, color);
+        
         oldX = x;
         oldY = y;
     }
