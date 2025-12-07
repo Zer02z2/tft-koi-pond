@@ -1,6 +1,6 @@
 #include "Circle.h"
 
-Circle::Circle(uint32_t x, uint32_t y, uint32_t radius)
+Circle::Circle(float x, float y, float radius)
     : x_(x), y_(y), radius_(radius)
 {
 }
@@ -9,17 +9,21 @@ float Circle::followPoint(float targetX, float targetY, uint32_t width, uint32_t
     float x = lerp(x_, targetX, 0.1f);
     float y = lerp(y_, targetY, 0.1f);
 
-    float radian = findTangent({x_, y_}, {targetX, targetY}) + 0.5f * M_PI;
+    float radian = findTangent({x_, y_}, {targetX, targetY}) + 0.5f * PI;
     float factor = map(
         dist(x_, y_, targetX, targetY),
         0,
         sqrt(pow(width, 2) + pow(height, 2)),
         0.0f, 1.0f
     );
+    
     float xOffset = cos(radian) * factor;
     float yOffset = sin(radian) * factor;
+    
     x_ = x + xOffset;
     y_ = y + yOffset;
+    
+    // Calculate acceleration (approximate)
     float acceleration = sqrt(pow(xOffset, 2) + pow(yOffset, 2));
     return acceleration;
 }
@@ -44,7 +48,7 @@ void Circle::applyPullingForce(const Circle &target, float gap, float *oscillate
     float radian = findTangent(target.getPosition(), getPosition());
     if (oscillateRadian) radian += *oscillateRadian;
 
-    float xOffset = gap * cos(radian);;
+    float xOffset = gap * cos(radian);
     float yOffset = gap * sin(radian);
     x_ = target.x_ + xOffset;
     y_ = target.y_ + yOffset;
@@ -54,10 +58,8 @@ void Circle::applyAngleConstrain(const Point &center,
                                 const Point &theOtherPoint,
                                 float gap, float smallestAngle)
 {
-    // find the angle between
     float radianDelta = findAngleBetween(center, getPosition(), theOtherPoint);
 
-    // if smaller than the constrain
     if (radianDelta < smallestAngle) {
         float theOtherPointRadian = findTangent(center, theOtherPoint);
         float radian;
@@ -66,18 +68,21 @@ void Circle::applyAngleConstrain(const Point &center,
         } else {
             radian = theOtherPointRadian - smallestAngle;
         }
+        x_ = center.x + gap * cos(radian);
+        y_ = center.y + gap * sin(radian);
     }
 
-    // if not straight, try to get straighten
-    if (radianDelta != M_PI) {
-        float targetRadian = findTangent(theOtherPoint, center) + M_PI;
+    if (radianDelta != PI) {
+        float targetRadian = findTangent(theOtherPoint, center) + PI;
         float currentRadian = findTangent(center, getPosition());
         float radianDiff = abs(targetRadian - currentRadian);
         float radian;
+        
+        // Simple easing/correction
         if (isOnLeft(center, theOtherPoint, getPosition())) {
             radian = currentRadian + radianDiff * 0.001f;
         } else {
-            radian = currentRadian - radianDiff * 0.1f;
+            radian = currentRadian - radianDiff * 0.001f;
         }
         x_ = center.x + gap * cos(radian);
         y_ = center.y + gap * sin(radian);

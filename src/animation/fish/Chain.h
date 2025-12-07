@@ -1,26 +1,35 @@
 #pragma once
 #include "../helper.h"
 #include "Circle.h"
+#include <vector>
 
 #define MAX_CHAIN_LENGTH 20
 
-class Chain{
+class Chain {
     public:
-        Chain(uint8_t x, uint8_t y, float gap, float angle, uint8_t *sizes[MAX_CHAIN_LENGTH]);
+        // Adjusted constructor to take a vector or array pointer + length
+        Chain(float x, float y, float gap, float angle, const std::vector<float>& sizes);
+        Chain() = default; // Default constructor for vectors
 
-        void freeMove(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
-        void constrainMove(uint8_t x, uint8_t y, float idealRadian, float constrainStrength = 0.7f);
-        void simpleMove(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
+        void freeMove(float x, float y, int width, int height);
+        void constrainMove(float x, float y, float idealRadian, float constrainStrength = 0.7f);
+        void simpleMove(float x, float y, int width, int height);
 
-        void drawOutline(LGFX_Sprite* sprite);
-        void drawRig(LGFX_Sprite* sprite);
+        void drawOutline(LGFX_Sprite* sprite, uint32_t color);
+        void drawRig(LGFX_Sprite* sprite, uint32_t color);
+        
         Point calculatePoint(const Circle& circle, float radian);
+        Circle& getCircle(int index);
+        int getLength() const { return length_; }
+
+        // Expose circles for Fish class access
+        Circle circles_[MAX_CHAIN_LENGTH];
 
     private:
-        Circle circles_[MAX_CHAIN_LENGTH];
-        uint8_t x_;
-        uint8_t y_;
+        float x_;
+        float y_;
         float gap_;
         float smallestAngle_;
-        long frameCount_ = 0;
+        float frameCount_ = 0;
+        int length_ = 0;
 };

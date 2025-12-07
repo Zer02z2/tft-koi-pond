@@ -5,9 +5,13 @@
 
 class Circle {
     public:
-        Circle(uint32_t x, uint32_t y, uint32_t radius);
+        // Default constructor
+        Circle() : x_(0), y_(0), radius_(0) {}
+        
+        Circle(float x, float y, float radius);
 
         float followPoint(float targetX, float targetY, uint32_t width, uint32_t height);
+        
         void followBody(const Circle &target,
                         const Circle *targetOfTarget,
                         float gap, float smallestAngle,
@@ -20,6 +24,7 @@ class Circle {
                                 float gap, float smallestAngle);
 
         Point getPosition() const;
+        float getRadius() const { return radius_; }
 
     private:
         float x_;
