@@ -7,7 +7,6 @@
 #include <config.hpp>
 #include <vector>
 
-// Include Animation Classes
 #include "animation/fish/Fish.h"
 #include "animation/leaf/Leaf.h"
 #include "animation/leaf/DuckWeed.h"
@@ -32,22 +31,22 @@ class Controller{
         ButtonGroup &buttons_;
         Adafruit_NeoPixel &pixels_;
 
-        // --- Animation Entities ---
         Fish* fish_ = nullptr;
         std::vector<Leaf> leaves_;
         std::vector<DuckWeed> duckWeeds_;
         std::vector<Ripple> ripples_;
 
-        // --- Physics & Drawing ---
         volatile std::uint32_t _draw_count = 0;
         void diffDraw(LGFX_Sprite* sp0, LGFX_Sprite* sp1);
         void drawfunc(void);
         
-        // --- Collision Logic ---
+        // Collisions
         void detectFishLeafCollision();
         void detectFishDuckWeedCollision();
+        void detectRippleLeafCollision();     // NEW
+        void detectRippleDuckWeedCollision(); // NEW
 
-        // --- Ripple Logic ---
         unsigned long lastRippleTime_ = 0;
         unsigned long rippleCooldown_ = 0;
+        float rippleIntensity_ = 60.0f;
 };
