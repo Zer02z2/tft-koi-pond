@@ -43,10 +43,17 @@ class Controller{
         // Collisions
         void detectFishLeafCollision();
         void detectFishDuckWeedCollision();
-        void detectRippleLeafCollision();     // NEW
-        void detectRippleDuckWeedCollision(); // NEW
+        void detectRippleLeafCollision();
+        void detectRippleDuckWeedCollision();
+        void detectFishFishCollision(); 
 
         unsigned long lastRippleTime_ = 0;
         unsigned long rippleCooldown_ = 0;
         float rippleIntensity_ = 60.0f;
+
+        // Button Interaction Flags
+        bool swimTopLeft_ = false;
+        bool swimTopRight_ = false;
+        bool swimBottomCenter_ = false;
+        bool spreadHolding_ = false;
 };

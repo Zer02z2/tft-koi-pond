@@ -1,6 +1,5 @@
 #include "ButtonGroup.h"
 
-// GCC builtin for population count
 #define popcount(x) __builtin_popcountl(x)
 
 ButtonGroup *ButtonGroup::instance_ = nullptr;
@@ -10,7 +9,7 @@ ButtonGroup::ButtonGroup(unsigned long debounce_ms, unsigned long long_ms)
 {
     for (uint8_t i = 0; i < MAX_BUTTONS; ++i) {
         pins_[i] = 0;
-        lastRaw_[i] = true; // assume pullup wiring
+        lastRaw_[i] = true; 
         lastRawChangeMs_[i] = 0;
         pressStartAt_[i] = 0;
         longRegistered_[i] = false;
@@ -20,6 +19,7 @@ ButtonGroup::ButtonGroup(unsigned long debounce_ms, unsigned long long_ms)
 void ButtonGroup::setLeftPin(uint8_t pin) { leftPin_ = pin; addIfMissing(pin); }
 void ButtonGroup::setRightPin(uint8_t pin) { rightPin_ = pin; addIfMissing(pin); }
 void ButtonGroup::setBottomPin(uint8_t pin) { bottomPin_ = pin; addIfMissing(pin); }
+void ButtonGroup::setSpreadPin(uint8_t pin) { spreadPin_ = pin; addIfMissing(pin); }
 
 int8_t ButtonGroup::findIndex(uint8_t pin) const {
     for (uint8_t i = 0; i < count_; ++i) if (pins_[i] == pin) return i;
@@ -55,7 +55,6 @@ void ButtonGroup::end() {
     }
 }
 
-// simple ISR: read all pins -> set mask and flag
 void IRAM_ATTR ButtonGroup::isr_handler() {
     if (!instance_) return;
     uint32_t mask = 0;
@@ -76,47 +75,33 @@ void ButtonGroup::service() {
 
     unsigned long now = millis();
 
-    // 1. Update raw states
     for (uint8_t i = 0; i < count_; ++i) {
         bool raw = (rawMask & (1UL << i)) != 0;
+        bool stable = (stableMask_ & (1UL << i)) != 0;
+        unsigned long changedAt = lastRawChangeMs_[i];
+
         if (raw != lastRaw_[i]) {
             lastRaw_[i] = raw;
             lastRawChangeMs_[i] = now;
         }
-    }
 
-    bool stableChanged = false;
-
-    // 2. Debounce Logic & Edge Detection
-    for (uint8_t i = 0; i < count_; ++i) {
-        bool raw = lastRaw_[i];
-        bool stable = (stableMask_ & (1UL << i)) != 0;
-        unsigned long changedAt = lastRawChangeMs_[i];
-
-        // If raw state differs from stable, and enough time passed
         if (raw != stable && changedAt != 0 && (now - changedAt) >= debounceMs_) {
-            
-            // Generate Immediate Edge Reports (In/Out)
-            // This happens EXACTLY when the button state is confirmed changed
             generateEdgeReport(i, raw);
 
-            // Existing Logic
-            if (raw) { // Pressed
+            if (raw) { 
                 stableMask_ |= (1UL << i);
                 pressStartAt_[i] = now;
                 longRegistered_[i] = false;
                 latchedMask_ |= (1UL << i);
                 sessionActive_ = true;
-            } else { // Released
+            } else { 
                 stableMask_ &= ~(1UL << i);
                 pressStartAt_[i] = 0;
             }
             lastRawChangeMs_[i] = 0;
-            stableChanged = true;
         }
     }
 
-    // 3. Long Press Detection
     if (sessionActive_) {
         uint8_t sc = popcount(stableMask_);
         if (sc == 1) {
@@ -142,9 +127,7 @@ void ButtonGroup::service() {
         }
     }
 
-    // 4. Session End (Existing Logic)
-    if (stableChanged && stableMask_ == 0 && sessionActive_) { 
-        // if all latched bits were already emitted as immediate longs, skip final report
+    if (stableMask_ == 0 && sessionActive_) { 
         if (!(sessionHasLong_ && emittedLongMask_ != 0 && emittedLongMask_ == latchedMask_)) {
             Report r;
             r.mask = latchedMask_;
@@ -153,8 +136,6 @@ void ButtonGroup::service() {
             r.text = buildLabel(latchedMask_, sessionHasLong_);
             queueReport(r);
         }
-        
-        // Reset session
         latchedMask_ = 0;
         sessionActive_ = false;
         sessionHasLong_ = false;
@@ -187,7 +168,6 @@ void ButtonGroup::queueReport(const Report &r) {
     interrupts();
 }
 
-// Generate Immediate Edge Reports (In/Out)
 void ButtonGroup::generateEdgeReport(uint8_t pinIndex, bool isPressed) {
     uint8_t pin = pins_[pinIndex];
     String evtText = "";
@@ -200,6 +180,9 @@ void ButtonGroup::generateEdgeReport(uint8_t pinIndex, bool isPressed) {
     }
     else if (bottomPin_ && pin == bottomPin_) {
         evtText = isPressed? "bottom-in" : "bottom-out";
+    }
+    else if (spreadPin_ && pin == spreadPin_) {
+        evtText = isPressed? "spread-in" : "spread-out";
     }
     
     if (evtText != "") {

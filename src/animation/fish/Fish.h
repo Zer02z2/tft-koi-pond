@@ -10,18 +10,29 @@ struct FinConfig {
     int position;
 };
 
+struct FishBounds {
+    float left, right, top, bottom;
+};
+
 class Fish {
     public:
         Fish(float x, float y, float length, float width, int canvasWidth, int canvasHeight, uint16_t fillColor = TFT_BLACK, uint16_t strokeColor = TFT_WHITE);
         
         void update(int width, int height);
         void draw(LGFX_Sprite* sprite);
-        void triggerDash();
+        
+        void triggerDash();               
+        void triggerDash(float radian);   
+        
+        void swim(float dx, float dy);    
 
-        // Getters for external collision detection (Controller)
-        Point getPosition() const;   // Returns Head (Cube) position
-        float getVelocity() const;   // Returns current velocity magnitude
-        float getWidth() const;      // Returns approximate width of the fish body
+        Point getPosition() const;
+        float getVelocity() const;
+        float getWidth() const;
+        float getSwimSpeed() const { return swimSpeed_; } // Getter
+        
+        bool getIsDashing() const;
+        FishBounds getBounds() const;
 
     private:
         float gap_;
@@ -29,6 +40,7 @@ class Fish {
         Cube cube_;
         uint16_t fillColor_ = TFT_BLACK;
         uint16_t strokeColor_ = TFT_WHITE;
+        float swimSpeed_; // New variable
         
         std::vector<FinConfig> fins_;
         std::vector<FinConfig> tails_;
@@ -37,7 +49,6 @@ class Fish {
         void drawBackFin(LGFX_Sprite* ctx);
         void drawEyes(LGFX_Sprite* ctx);
 
-        
         const std::vector<float> bodyPoints = {
             0.326, 0.641, 0.817, 0.9, 0.97, 0.957, 0.872, 0.787, 0.702, 0.618, 0.516, 0.414, 0.316, 0.219
         };

@@ -15,6 +15,7 @@ static LGFX_Sprite _sprites[2] = { LGFX_Sprite(&lcd), LGFX_Sprite(&lcd) };
 #define LEFT_BUTTON_PIN 21
 #define RIGHT_BUTTON_PIN 26
 #define Bottom_BUTTON_PIN 33
+#define SPREAD_BUTTON_PIN 34  // New Button
 
 #define LED_PIN 46
 #define LED_COUNT 3
@@ -32,6 +33,7 @@ void setup() {
     buttonGroup.setLeftPin(LEFT_BUTTON_PIN);
     buttonGroup.setRightPin(RIGHT_BUTTON_PIN);
     buttonGroup.setBottomPin(Bottom_BUTTON_PIN);
+    buttonGroup.setSpreadPin(SPREAD_BUTTON_PIN); // Setup Spread Button
 
     controller.begin();
 }

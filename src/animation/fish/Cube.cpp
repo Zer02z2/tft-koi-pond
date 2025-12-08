@@ -32,6 +32,12 @@ void Cube::update(int xBound, int yBound) {
     preventOverBoarder(xBound, yBound);
 }
 
+// NEW: Manual shift
+void Cube::move(float dx, float dy) {
+    x_ += dx;
+    y_ += dy;
+}
+
 float Cube::boostVelocity() {
     return randomFloat(vMax / 2.0f, vMax);
 }

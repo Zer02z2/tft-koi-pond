@@ -2,6 +2,10 @@
 
 Fish::Fish(float x, float y, float length, float width, int canvasWidth, int canvasHeight, uint16_t fillColor, uint16_t strokeColor):
     fillColor_(fillColor), strokeColor_(strokeColor){
+    
+    // Initialize random swim speed
+    swimSpeed_ = randomFloat(3.0f, 5.0f);
+
     gap_ = length / (float)bodyPoints.size();
     float smallestAngle = 165.0f;
     
@@ -82,7 +86,13 @@ void Fish::triggerDash() {
     cube_.dash(angle);
 }
 
-// --- Getters for Collision Logic ---
+void Fish::triggerDash(float radian) {
+    cube_.dash(radian);
+}
+
+void Fish::swim(float dx, float dy) {
+    cube_.move(dx, dy);
+}
 
 Point Fish::getPosition() const {
     return cube_.getPosition();
@@ -93,27 +103,38 @@ float Fish::getVelocity() const {
 }
 
 float Fish::getWidth() const {
-    // Return approximate width based on the middle body segment (index ~4)
-    // radius * 2 = diameter
     if (body_.getLength() > 4) {
         return ((Circle&)body_.circles_[4]).getRadius() * 2.0f;
     }
-    return 10.0f; // Fallback
+    return 10.0f;
 }
 
-// --- Drawing ---
+bool Fish::getIsDashing() const {
+    return getVelocity() > cube_.vMax;
+}
+
+FishBounds Fish::getBounds() const {
+    Point p0 = body_.circles_[0].getPosition();
+    float minX = p0.x, maxX = p0.x;
+    float minY = p0.y, maxY = p0.y;
+
+    for(int i=0; i<body_.getLength(); i++) {
+        Point p = body_.circles_[i].getPosition();
+        if(p.x < minX) minX = p.x;
+        if(p.x > maxX) maxX = p.x;
+        if(p.y < minY) minY = p.y;
+        if(p.y > maxY) maxY = p.y;
+    }
+    return {minX - gap_, maxX + gap_, minY - gap_, maxY + gap_};
+}
 
 void Fish::draw(LGFX_Sprite* sprite) {
- 
     for (auto& f : fins_) f.fin.draw(sprite, fillColor_, strokeColor_);
     for (int i = 0; i < tails_.size(); i++) {
         auto& t = tails_[i];
         t.fin.draw(sprite, fillColor_, strokeColor_);
-        //t.fin.drawRig(sprite, strokeColor_);
     }
-
     body_.draw(sprite, fillColor_, strokeColor_);
-
     drawBackFin(sprite);
     drawEyes(sprite);
 }
@@ -142,7 +163,7 @@ void Fish::drawEyes(LGFX_Sprite* ctx) {
     Point p0 = body_.getCircle(0).getPosition();
     Point p1 = body_.getCircle(1).getPosition();
     float radian = findTangent(p0, p1);
-    float eyeDist = body_.getCircle(2).getRadius(); // Approx dist
+    float eyeDist = body_.getCircle(2).getRadius();
     float eyeSize = gap_ * 0.4f;
 
     auto drawEye = [&](float rad) {
@@ -150,7 +171,6 @@ void Fish::drawEyes(LGFX_Sprite* ctx) {
         float dy = eyeDist * sin(rad);
         ctx->fillCircle((int)(p0.x + dx), (int)(p0.y + dy), (int)eyeSize, strokeColor_);
     };
-
     drawEye(radian + PI / 4.0f);
     drawEye(radian - PI / 4.0f);
 }

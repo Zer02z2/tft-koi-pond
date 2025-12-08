@@ -1,6 +1,7 @@
 #pragma once
 #include "../helper.h"
 #include <vector>
+#include <LovyanGFX.hpp>
 
 struct DuckWeedPoint {
     float length;
@@ -9,7 +10,8 @@ struct DuckWeedPoint {
 
 class DuckWeed {
     public:
-        DuckWeed(float x, float y, float radius, int segments, uint16_t weedColor);
+        // Changed constructor to accept fillColor and strokeColor
+        DuckWeed(float x, float y, float radius, int segments, uint16_t fillColor, uint16_t strokeColor);
         void update(int width, int height);
         void applyVector(float x, float y, float strength);
         void draw(LGFX_Sprite* sprite);
@@ -25,5 +27,6 @@ class DuckWeed {
         Point moveVector_ = {0, 0};
         float vectorMax_;
 
-        uint16_t weedColor_;
+        uint16_t fillColor_;
+        uint16_t strokeColor_;
 };

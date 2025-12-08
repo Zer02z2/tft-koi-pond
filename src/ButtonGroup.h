@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 #define MAX_BUTTONS 12
-#define REPORT_QUEUE_SIZE 8 // Buffer size to handle parallel events
+#define REPORT_QUEUE_SIZE 8 
 
 class ButtonGroup {
     public:
@@ -19,6 +19,7 @@ class ButtonGroup {
         void setLeftPin(uint8_t pin);
         void setRightPin(uint8_t pin);
         void setBottomPin(uint8_t pin);
+        void setSpreadPin(uint8_t pin); // New setter
 
         void begin();
         void end();
@@ -30,11 +31,9 @@ class ButtonGroup {
     private:
         static ButtonGroup *instance_;
 
-        // Config
         unsigned long debounceMs_;
         unsigned long longMs_;
 
-        // Pins
         uint8_t pins_[MAX_BUTTONS];
         uint8_t count_ = 0;
 
@@ -42,8 +41,8 @@ class ButtonGroup {
         uint8_t leftPin_ = 0;
         uint8_t rightPin_ = 0;
         uint8_t bottomPin_ = 0;
+        uint8_t spreadPin_ = 0; // New role
 
-        // State
         volatile uint32_t isrMask_ = 0;
         volatile bool isrChanged_ = false;
 
@@ -55,17 +54,14 @@ class ButtonGroup {
         uint32_t stableMask_ = 0;
         uint32_t latchedMask_ = 0;
 
-        // Session Logic
         bool sessionActive_ = false;
         bool sessionHasLong_ = false;
         uint32_t emittedLongMask_ = 0;
 
-        // Report Queue
         Report reportQueue_[REPORT_QUEUE_SIZE];
         uint8_t qHead_ = 0;
         uint8_t qTail_ = 0;
 
-        // Helpers
         int8_t findIndex(uint8_t pin) const;
         void addIfMissing(uint8_t pin);
         String buildLabel(uint32_t mask, bool isLong) const;

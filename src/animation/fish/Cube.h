@@ -10,6 +10,7 @@ class Cube {
 
         void update(int xBound, int yBound);
         void dash(float radian);
+        void move(float dx, float dy); // NEW: Manual movement
         Point getPosition() const;
         
         float vX, vY;
