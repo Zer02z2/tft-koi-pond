@@ -12,7 +12,7 @@ struct FinConfig {
 
 class Fish {
     public:
-        Fish(float x, float y, float length, float width, int canvasWidth, int canvasHeight, uint32_t fillColor = TFT_BLACK, uint32_t strokeColor = TFT_WHITE);
+        Fish(float x, float y, float length, float width, int canvasWidth, int canvasHeight, uint16_t fillColor = TFT_BLACK, uint16_t strokeColor = TFT_WHITE);
         
         void update(int width, int height);
         void draw(LGFX_Sprite* sprite);
@@ -27,8 +27,8 @@ class Fish {
         float gap_;
         Chain body_;
         Cube cube_;
-        uint32_t fillColor_ = TFT_BLACK;
-        uint32_t strokeColor_ = TFT_WHITE;
+        uint16_t fillColor_ = TFT_BLACK;
+        uint16_t strokeColor_ = TFT_WHITE;
         
         std::vector<FinConfig> fins_;
         std::vector<FinConfig> tails_;

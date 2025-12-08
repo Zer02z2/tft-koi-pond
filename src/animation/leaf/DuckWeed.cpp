@@ -1,8 +1,8 @@
 #include "DuckWeed.h"
 #include "../helper.h"
 
-DuckWeed::DuckWeed(float x, float y, float radius, int segments)
-    : radius_(radius), xCur_(x), yCur_(y), xTar_(x), yTar_(y)
+DuckWeed::DuckWeed(float x, float y, float radius, int segments, uint16_t weedColor)
+    : radius_(radius), xCur_(x), yCur_(y), xTar_(x), yTar_(y), weedColor_(weedColor)
 {
     float firstPointRadian = randomFloat(0, 2 * PI);
     float segmentRadian = (2 * PI) / segments;
@@ -54,8 +54,6 @@ void DuckWeed::draw(LGFX_Sprite* sprite) {
         renderPoints.push_back(findPosition({xCur_, yCur_}, p.radian, p.length));
     }
 
-    uint32_t weedColor = sprite->color565(93, 206, 71); 
-
     int len = renderPoints.size();
     Point pLast = renderPoints[len - 1];
     Point pStart = { (renderPoints[0].x + pLast.x)/2.0f, (renderPoints[0].y + pLast.y)/2.0f };
@@ -65,12 +63,12 @@ void DuckWeed::draw(LGFX_Sprite* sprite) {
         Point p1 = renderPoints[i];
         Point p2 = renderPoints[i+1];
         Point mid = { (p1.x + p2.x)/2.0f, (p1.y + p2.y)/2.0f };
-        drawQuadraticBezier(sprite, currentP.x, currentP.y, p1.x, p1.y, mid.x, mid.y, weedColor);
+        drawQuadraticBezier(sprite, currentP.x, currentP.y, p1.x, p1.y, mid.x, mid.y, weedColor_);
         currentP = mid;
     }
     
     Point pEnd = renderPoints[len-1];
-    drawQuadraticBezier(sprite, currentP.x, currentP.y, pEnd.x, pEnd.y, pStart.x, pStart.y, weedColor);
+    drawQuadraticBezier(sprite, currentP.x, currentP.y, pEnd.x, pEnd.y, pStart.x, pStart.y, weedColor_);
 }
 
 Point DuckWeed::getPosition() const {

@@ -43,23 +43,25 @@ void Controller::begin() {
     int h = lcd_.height();
 
     // Fish
-    float fishSize = sqrt(pow(w, 2) + pow(h, 2)) * 0.015f * randomFloat(0.8f, 1.2f);
-    float fishLength = fishSize * randomFloat(6.0f, 8.5f); 
-    float fishWidth = fishLength * randomFloat(0.2f, 0.24f);
-    
-    // [COLORS] 16-bit RGB565
-    // Note: color565 returns a uint16_t packed into uint32_t.
-    uint32_t fishFill = sprites_[0]->color565(29, 29, 29); 
-    uint32_t fishStroke = sprites_[0]->color565(155, 155, 155);
-    
-    if (fish_) delete fish_;
-    fish_ = new Fish(w/2.0f, h/2.0f, fishLength, fishWidth, w, h, fishFill, fishStroke);
+    int numFish = 5;
+    fishes_.clear();
+    uint16_t fishFill = lcd_.color565(29, 29, 29); 
+    uint16_t fishStroke = lcd_.color565(155, 155, 155);
+
+    for (int i=0; i<numFish; i++) {
+        float fishSize = sqrt(pow(w, 2) + pow(h, 2)) * 0.015f * randomFloat(0.8f, 1.2f);
+        float fishLength = fishSize * randomFloat(6.0f, 8.5f); 
+        float fishWidth = fishLength * randomFloat(0.24f, 0.28f);
+        int posX = random(0, w);
+        int posY = random(0, h);
+        fishes_.emplace_back(posX, posY, fishLength, fishWidth, w, h, fishFill, fishStroke);
+    }
 
     // Leaves
-    int numLeaves = 15;
+    int numLeaves = 10;
     leaves_.clear();
-    uint32_t leafFill = sprites_[0]->color565(62, 145, 60); 
-    uint32_t leafStroke = sprites_[0]->color565(0, 0, 0); 
+    uint16_t leafFill = lcd_.color565(62, 145, 60); 
+    uint16_t leafStroke = lcd_.color565(0, 0, 0); 
 
     for(int i=0; i<numLeaves; i++) {
         float size = sqrt(pow(w, 2) + pow(h, 2));
@@ -70,10 +72,11 @@ void Controller::begin() {
     // DuckWeeds
     int numDuckWeeds = 50;
     duckWeeds_.clear();
+    uint16_t weedColor = lcd_.color565(62, 145, 60);
     for(int i=0; i<numDuckWeeds; i++) {
-        float size = sqrt(pow(w, 2) + pow(h, 2));
+        float size = sqrt(pow(w, 2)+ pow(h, 2));
         float radius = randomFloat(size * 0.001f, size * 0.01f);
-        duckWeeds_.emplace_back(randomFloat(0, w), randomFloat(0, h), radius, 4);
+        duckWeeds_.emplace_back(randomFloat(0, w), randomFloat(0, h), radius, 4, weedColor);
     }
     
     rippleCooldown_ = (unsigned long)randomFloat(2000, 7000);
@@ -81,41 +84,49 @@ void Controller::begin() {
 }
 
 void Controller::handleReport(const ButtonGroup::Report &rep) {
-    if (fish_ && !rep.longPress) {
-        fish_->triggerDash();
-        Point p = fish_->getPosition();
-        // Spawning ripple with 100 intensity
-        ripples_.emplace_back(p.x, p.y, rippleIntensity_); 
+    if (!fishes_.empty() && !rep.longPress) {
+        for (auto& fish : fishes_) {
+            fish.triggerDash();
+            Point p = fish.getPosition();
+            // Spawning ripple
+            if (randomFloat(0, 1) < 0.3f) {
+                ripples_.emplace_back(p.x, p.y, randomFloat(0, rippleIntensity_ * 0.5f));
+            }
+        } 
     }
 }
 
 // --- Collision Detection ---
 
 void Controller::detectFishLeafCollision() {
-    if(!fish_) return;
-    Point fishP = fish_->getPosition(); 
-    float fishVel = fish_->getVelocity(); 
-    float fishWidth = fish_->getWidth();
+    if(fishes_.empty()) return;
+    for (auto& fish : fishes_) {
+        Point fishP = fish.getPosition(); 
+        float fishVel = fish.getVelocity(); 
+        float fishWidth = fish.getWidth();
 
-    for (auto& leaf : leaves_) {
-        Point leafP = leaf.getPosition();
-        float d = dist(fishP.x, fishP.y, leafP.x, leafP.y);
-        if (d >= fishWidth * 2.0f || d == 0) continue; 
-        leaf.applyOscillation(fishP.x, fishP.y, fishVel / d);
+        for (auto& leaf : leaves_) {
+            Point leafP = leaf.getPosition();
+            float d = dist(fishP.x, fishP.y, leafP.x, leafP.y);
+            if (d >= fishWidth * 2.0f || d == 0) continue; 
+            leaf.applyOscillation(fishP.x, fishP.y, fishVel / d);
+        }
     }
 }
 
 void Controller::detectFishDuckWeedCollision() {
-    if(!fish_) return;
-    Point fishP = fish_->getPosition(); 
-    float fishVel = fish_->getVelocity(); 
-    float fishWidth = fish_->getWidth();
+    if(fishes_.empty()) return;
+    for (auto& fish : fishes_) {
+        Point fishP = fish.getPosition(); 
+        float fishVel = fish.getVelocity(); 
+        float fishWidth = fish.getWidth();
 
-    for (auto& dw : duckWeeds_) {
-        Point dwP = dw.getPosition();
-        float d = dist(fishP.x, fishP.y, dwP.x, dwP.y);
-        if (d >= fishWidth * 2.0f || d == 0) continue;
-        dw.applyVector(fishP.x, fishP.y, (0.2f * fishVel) / d);
+        for (auto& dw : duckWeeds_) {
+            Point dwP = dw.getPosition();
+            float d = dist(fishP.x, fishP.y, dwP.x, dwP.y);
+            if (d >= fishWidth * 2.0f || d == 0) continue;
+            dw.applyVector(fishP.x, fishP.y, (0.2f * fishVel) / d);
+        }
     }
 }
 
@@ -202,7 +213,7 @@ void Controller::diffDraw(LGFX_Sprite* sp0, LGFX_Sprite* sp1) {
 }
 
 void Controller::drawfunc(void) {
-    if (!sprites_[0] || !sprites_[1] || !fish_) return;
+    if (!sprites_[0] || !sprites_[1] || fishes_.empty()) return;
 
     std::size_t flip = _draw_count & 1;
     LGFX_Sprite* currentSprite = sprites_[flip];
@@ -224,21 +235,24 @@ void Controller::drawfunc(void) {
     }
 
     // --- Update & Bounce ---
+    bool bounceEnabled = false;
     std::vector<Ripple> bouncedRipples;
     for (int i = ripples_.size() - 1; i >= 0; i--) {
         bool alive = ripples_[i].update();
         
-        std::vector<Ripple> newR = ripples_[i].detectBouncing(lcd_.width(), lcd_.height());
-        bouncedRipples.insert(bouncedRipples.end(), newR.begin(), newR.end());
+        if (bounceEnabled) {
+            std::vector<Ripple> newR = ripples_[i].detectBouncing(lcd_.width(), lcd_.height());
+            bouncedRipples.insert(bouncedRipples.end(), newR.begin(), newR.end());
+        }
 
         if (!alive) {
             ripples_.erase(ripples_.begin() + i);
         }
     }
-    ripples_.insert(ripples_.end(), bouncedRipples.begin(), bouncedRipples.end());
+    if (bounceEnabled) ripples_.insert(ripples_.end(), bouncedRipples.begin(), bouncedRipples.end());
 
     // --- Physics ---
-    fish_->update(lcd_.width(), lcd_.height());
+    for (auto& fish : fishes_) fish.update(lcd_.width(), lcd_.height());
     for(auto& l : leaves_) l.update();
     for(auto& d : duckWeeds_) d.update(lcd_.width(), lcd_.height());
 
@@ -251,7 +265,7 @@ void Controller::drawfunc(void) {
     // --- Draw Layers ---
     for(auto& d : duckWeeds_) d.draw(currentSprite);
     for(auto& r : ripples_) r.draw(currentSprite);
-    fish_->draw(currentSprite);
+    for (auto& fish : fishes_) fish.draw(currentSprite);
     for(auto& l : leaves_) l.draw(currentSprite);
 
     diffDraw(currentSprite, prevSprite);

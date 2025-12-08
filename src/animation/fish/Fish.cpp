@@ -1,6 +1,6 @@
 #include "Fish.h"
 
-Fish::Fish(float x, float y, float length, float width, int canvasWidth, int canvasHeight, uint32_t fillColor, uint32_t strokeColor):
+Fish::Fish(float x, float y, float length, float width, int canvasWidth, int canvasHeight, uint16_t fillColor, uint16_t strokeColor):
     fillColor_(fillColor), strokeColor_(strokeColor){
     gap_ = length / (float)bodyPoints.size();
     float smallestAngle = 165.0f;
@@ -143,7 +143,7 @@ void Fish::drawEyes(LGFX_Sprite* ctx) {
     Point p1 = body_.getCircle(1).getPosition();
     float radian = findTangent(p0, p1);
     float eyeDist = body_.getCircle(2).getRadius(); // Approx dist
-    float eyeSize = gap_ * 0.2f;
+    float eyeSize = gap_ * 0.4f;
 
     auto drawEye = [&](float rad) {
         float dx = eyeDist * cos(rad);

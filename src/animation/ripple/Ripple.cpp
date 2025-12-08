@@ -58,7 +58,7 @@ void Ripple::draw(LGFX_Sprite* sprite) {
         uint8_t b = (uint8_t)map(r.currentIntensity, 0, 100, 0, 255);
         
         // 16-bit Grayscale
-        uint32_t color = sprite->color565(b, b, b);
+        uint16_t color = sprite->color565(b, b, b);
         
         sprite->drawCircle((int)x_, (int)y_, (int)r.currentRadius, color);
     }

@@ -74,7 +74,7 @@ Point Chain::calculatePoint(const Circle& circle, float radian) {
     return { pos.x + r * cos(radian), pos.y + r * sin(radian) };
 }
 
-void Chain::draw(LGFX_Sprite* sprite, uint32_t fillColor, uint32_t strokeColor) {
+void Chain::draw(LGFX_Sprite* sprite, uint16_t fillColor, uint16_t strokeColor) {
     std::vector<Point> leftPoints;
     std::vector<Point> rightPoints;
     
@@ -151,7 +151,7 @@ void Chain::draw(LGFX_Sprite* sprite, uint32_t fillColor, uint32_t strokeColor) 
     drawQuadraticBezier(sprite, pStart.x, pStart.y, lastP.x, lastP.y, firstMid.x, firstMid.y, strokeColor);
 }
 
-void Chain::drawRig(LGFX_Sprite* sprite, uint32_t color) {
+void Chain::drawRig(LGFX_Sprite* sprite, uint16_t color) {
     for (int i = 0; i < length_; ++i) {
         Point p = circles_[i].getPosition();
         sprite->drawCircle((int)p.x, (int)p.y, (int)circles_[i].getRadius(), color);

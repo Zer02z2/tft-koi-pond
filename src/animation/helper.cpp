@@ -50,7 +50,7 @@ float dist(float x1, float y1, float x2, float y2) {
     return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 }
 
-void drawQuadraticBezier(LGFX_Sprite* sprite, float x0, float y0, float x1, float y1, float x2, float y2, uint32_t color) {
+void drawQuadraticBezier(LGFX_Sprite* sprite, float x0, float y0, float x1, float y1, float x2, float y2, uint16_t color) {
     float oldX = x0;
     float oldY = y0;
     // Lower step = smoother but slower. 0.1 is a good balance.
@@ -64,7 +64,7 @@ void drawQuadraticBezier(LGFX_Sprite* sprite, float x0, float y0, float x1, floa
     }
 }
 
-void fillQuadraticBezier(LGFX_Sprite* sprite, Point anchor, float x0, float y0, float x1, float y1, float x2, float y2, uint32_t color) {
+void fillQuadraticBezier(LGFX_Sprite* sprite, Point anchor, float x0, float y0, float x1, float y1, float x2, float y2, uint16_t color) {
     float oldX = x0;
     float oldY = y0;
     // Step 0.1 gives 10 triangles per curve. Decrease for higher quality.

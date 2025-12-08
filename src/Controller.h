@@ -31,7 +31,7 @@ class Controller{
         ButtonGroup &buttons_;
         Adafruit_NeoPixel &pixels_;
 
-        Fish* fish_ = nullptr;
+        std::vector<Fish> fishes_;
         std::vector<Leaf> leaves_;
         std::vector<DuckWeed> duckWeeds_;
         std::vector<Ripple> ripples_;

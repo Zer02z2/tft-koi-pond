@@ -9,7 +9,7 @@ struct DuckWeedPoint {
 
 class DuckWeed {
     public:
-        DuckWeed(float x, float y, float radius, int segments);
+        DuckWeed(float x, float y, float radius, int segments, uint16_t weedColor);
         void update(int width, int height);
         void applyVector(float x, float y, float strength);
         void draw(LGFX_Sprite* sprite);
@@ -24,4 +24,6 @@ class DuckWeed {
         std::vector<DuckWeedPoint> points_;
         Point moveVector_ = {0, 0};
         float vectorMax_;
+
+        uint16_t weedColor_;
 };
