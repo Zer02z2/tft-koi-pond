@@ -11,6 +11,7 @@
 #include "animation/fish/Fish.h"
 #include "animation/leaf/Leaf.h"
 #include "animation/leaf/DuckWeed.h"
+#include "animation/ripple/Ripple.h"
 
 class Controller{
     public:
@@ -35,6 +36,7 @@ class Controller{
         Fish* fish_ = nullptr;
         std::vector<Leaf> leaves_;
         std::vector<DuckWeed> duckWeeds_;
+        std::vector<Ripple> ripples_;
 
         // --- Physics & Drawing ---
         volatile std::uint32_t _draw_count = 0;
@@ -44,4 +46,8 @@ class Controller{
         // --- Collision Logic ---
         void detectFishLeafCollision();
         void detectFishDuckWeedCollision();
+
+        // --- Ripple Logic ---
+        unsigned long lastRippleTime_ = 0;
+        unsigned long rippleCooldown_ = 0;
 };

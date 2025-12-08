@@ -102,20 +102,16 @@ void Chain::draw(LGFX_Sprite* sprite, uint32_t fillColor, uint32_t strokeColor) 
     }
 
     // --- 2. Draw Fill (Triangle Strip) ---
-    // for (int i = 0; i < length_ - 1; i++) {
-    //     Point l1 = leftPoints[i];
-    //     Point r1 = rightPoints[i];
-    //     Point l2 = leftPoints[i+1];
-    //     Point r2 = rightPoints[i+1];
+    for (int i = 0; i < length_ - 1; i++) {
+        Point l1 = leftPoints[i];
+        Point r1 = rightPoints[i];
+        Point l2 = leftPoints[i+1];
+        Point r2 = rightPoints[i+1];
 
-    //     // Fill two triangles to form the quad between segments
-    //     sprite->fillTriangle((int)l1.x, (int)l1.y, (int)r1.x, (int)r1.y, (int)l2.x, (int)l2.y, fillColor);
-    //     sprite->fillTriangle((int)r1.x, (int)r1.y, (int)l2.x, (int)l2.y, (int)r2.x, (int)r2.y, fillColor);
-    // }
-
-    // Fill Caps to close gaps
-    //sprite->fillCircle((int)circles_[0].getPosition().x, (int)circles_[0].getPosition().y, (int)circles_[0].getRadius(), fillColor);
-    //sprite->fillCircle((int)circles_[length_-1].getPosition().x, (int)circles_[length_-1].getPosition().y, (int)circles_[length_-1].getRadius(), fillColor);
+        // Fill two triangles to form the quad between segments
+        sprite->fillTriangle((int)l1.x, (int)l1.y, (int)r1.x, (int)r1.y, (int)l2.x, (int)l2.y, fillColor);
+        sprite->fillTriangle((int)r1.x, (int)r1.y, (int)l2.x, (int)l2.y, (int)r2.x, (int)r2.y, fillColor);
+    }
 
 
     // --- 3. Draw Outline (Bezier Loop) ---
