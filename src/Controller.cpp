@@ -55,11 +55,12 @@ void Controller::begin() {
     leaves_.clear();
     uint16_t leafFill = lcd_.color565(62, 145, 60); 
     uint16_t leafStroke = lcd_.color565(0, 0, 0); 
+    int segments = 16;
 
     for(int i=0; i<numLeaves; i++) {
-        float size = sqrt(pow(w, 2) + pow(h, 2)) * 1.0f;
+        float size = sqrt(pow(w, 2) + pow(h, 2)) * 1.2f;
         float radius = randomFloat(size * 0.02f, size * 0.05f);
-        leaves_.emplace_back(randomFloat(0, w), randomFloat(0, h), radius, 12, leafFill, leafStroke);
+        leaves_.emplace_back(randomFloat(0, w), randomFloat(0, h), radius, segments, leafFill, leafStroke);
     }
 
     int numDuckWeeds = 50;
@@ -146,7 +147,7 @@ void Controller::detectFishLeafCollision() {
             Point leafP = leaf.getPosition();
             float d = dist(fishP.x, fishP.y, leafP.x, leafP.y);
             if (d >= fishWidth * 2.0f || d == 0) continue; 
-            leaf.applyOscillation(fishP.x, fishP.y, fishVel / d);
+            leaf.applyOscillation(fishP.x, fishP.y, fishVel / d * 2.0f);
         }
     }
 }
@@ -343,9 +344,9 @@ void Controller::drawfunc(void) {
     detectFishFishCollision(); 
 
     // Draw
+    for (auto& fish : fishes_) fish.draw(currentSprite);
     for(auto& d : duckWeeds_) d.draw(currentSprite);
     for(auto& r : ripples_) r.draw(currentSprite);
-    for (auto& fish : fishes_) fish.draw(currentSprite);
     for(auto& l : leaves_) l.draw(currentSprite);
 
     diffDraw(currentSprite, prevSprite);

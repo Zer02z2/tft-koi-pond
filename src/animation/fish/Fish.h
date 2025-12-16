@@ -40,7 +40,7 @@ class Fish {
         Cube cube_;
         uint16_t fillColor_ = TFT_BLACK;
         uint16_t strokeColor_ = TFT_WHITE;
-        float swimSpeed_; // New variable
+        float swimSpeed_;
         
         std::vector<FinConfig> fins_;
         std::vector<FinConfig> tails_;

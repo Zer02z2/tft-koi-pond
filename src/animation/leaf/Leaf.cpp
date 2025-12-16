@@ -8,7 +8,7 @@ Leaf::Leaf(float x, float y, float radius, int segments, uint32_t fillColor, uin
     float segmentRadian = (2 * PI) / segments;
 
     for (int i = 0; i < segments; i++) {
-        float len = (i == 0) ? randomFloat(radius * 0.1f, radius * 0.2f) : randomFloat(radius * 0.98f, radius * 1.02f);
+        float len = (i == 0) ? randomFloat(radius * 0.1f, radius * 0.2f) : randomFloat(radius * 0.96f, radius * 1.04f);
         float radian = firstPointRadian + segmentRadian * i;
         points_.push_back({len, radian});
     }
@@ -74,6 +74,8 @@ void Leaf::draw(LGFX_Sprite* sprite) {
     }
     fillQuadraticBezier(sprite, anchor, currentP.x, currentP.y, pEnd.x, pEnd.y, pStart.x, pStart.y, fillColor_);
 
+    currentP = pStart;
+    Point firstPoint = renderPoints[0];
     // Drawing closed loop
     for (int i = 0; i < len - 1; i++) {
         Point p1 = renderPoints[i];

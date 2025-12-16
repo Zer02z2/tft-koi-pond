@@ -20,14 +20,18 @@ void DuckWeed::update(int width, int height) {
     xTar_ += moveVector_.x;
     yTar_ += moveVector_.y;
 
-    // Bounds check
-    if (xTar_ < 0) xTar_ = 0;
-    if (xTar_ > width) xTar_ = width;
-    if (yTar_ < 0) yTar_ = 0;
-    if (yTar_ > height) yTar_ = height;
-
     moveVector_.x *= 0.99f;
     moveVector_.y *= 0.99f;
+
+    if (xCur_ + radius_ < 0 || xCur_ - radius_ > width ||
+        yCur_ + radius_ < 0 || yCur_ - radius_ > height) {
+        // Teleport to random position within bounds
+        xCur_ = randomFloat(0, width);
+        yCur_ = randomFloat(0, height);
+        xTar_ = xCur_;
+        yTar_ = yCur_;
+        moveVector_ = {0, 0};
+    }
 }
 
 void DuckWeed::applyVector(float x, float y, float strength) {
